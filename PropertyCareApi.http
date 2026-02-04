@@ -1,0 +1,6 @@
+@PropertyCareApi_HostAddress = http://localhost:5219
+
+GET {{PropertyCareApi_HostAddress}}/
+Accept: application/json
+
+###

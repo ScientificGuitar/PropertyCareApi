@@ -17,9 +17,9 @@ namespace PropertyCareApi.Data
 
             // https://www.milanjovanovic.tech/blog/implementing-soft-delete-with-ef-core
             // What this basically does is append `WHERE DeletedAt IS NULL` to most queries.
-            modelBuilder.Entity<User>().HasQueryFilter(r => !r.IsDeleted);
-            modelBuilder.Entity<Property>().HasQueryFilter(r => !r.IsDeleted);
-            modelBuilder.Entity<MaintenanceRequest>().HasQueryFilter(r => !r.IsDeleted);
+            modelBuilder.Entity<User>().HasQueryFilter(u => u.DeletedAt == null);
+            modelBuilder.Entity<Property>().HasQueryFilter(p => p.DeletedAt == null);
+            modelBuilder.Entity<MaintenanceRequest>().HasQueryFilter(m => m.DeletedAt == null);
 
             ApplyBaseEntityConfiguration(modelBuilder);
         }

@@ -38,7 +38,7 @@ namespace PropertyCareApi.Data
             {
                 Id = Guid.NewGuid(),
                 PropertyId = property.Id,
-                Category = "Plumbing",
+                Category = RequestCategory.Plumbing,
                 Description = "Leaking pipe under sink",
                 Priority = PriorityLevel.High
             };

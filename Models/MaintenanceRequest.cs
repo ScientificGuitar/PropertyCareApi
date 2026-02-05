@@ -1,14 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
 namespace PropertyCareApi.Models
 {
-    public class MaintenanceRequest
+    public class MaintenanceRequest : BaseEntity
     {
-        public Guid Id { get; set; }
-
         public Guid PropertyId { get; set; }
         public Property Property { get; set; } = null!;
 
@@ -17,7 +10,6 @@ namespace PropertyCareApi.Models
         public PriorityLevel Priority { get; set; }
         public RequestStatus Status { get; set; } = RequestStatus.Submitted;
 
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? CompletedAt { get; set; }
     }
 

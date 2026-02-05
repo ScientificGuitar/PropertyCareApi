@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using PropertyCareApi.Models;
@@ -26,9 +22,6 @@ namespace PropertyCareApi.Data.Configurations
                 .IsRequired();
 
             builder.Property(m => m.Status)
-                .IsRequired();
-
-            builder.Property(m => m.CreatedAt)
                 .IsRequired();
 
             builder.HasOne(m => m.Property)

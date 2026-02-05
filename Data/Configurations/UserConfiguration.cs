@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using PropertyCareApi.Models;
@@ -24,9 +20,6 @@ namespace PropertyCareApi.Data.Configurations
                 .IsUnique();
 
             builder.Property(u => u.Role)
-                .IsRequired();
-
-            builder.Property(u => u.CreatedAt)
                 .IsRequired();
         }
     }

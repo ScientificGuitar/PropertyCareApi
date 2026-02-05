@@ -1,4 +1,3 @@
-using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using PropertyCareApi.Models;
 
@@ -31,6 +30,21 @@ namespace PropertyCareApi.Data
         {
             var now = DateTime.UtcNow;
 
+            var auditEntries = ChangeTracker.Entries<BaseEntity>()
+                .Where(e =>
+                    e.State == EntityState.Added ||
+                    e.State == EntityState.Modified ||
+                    e.State == EntityState.Deleted)
+                .Select(e => new AuditLog
+                {
+                    Id = Guid.NewGuid(),
+                    EntityType = e.Entity.GetType().Name,
+                    EntityId = e.Entity.Id,
+                    Action = e.State.ToString(),
+                    CreatedAt = now
+                })
+                .ToList();
+
             foreach (var entry in ChangeTracker.Entries<BaseEntity>())
             {
                 switch (entry.State)
@@ -41,10 +55,22 @@ namespace PropertyCareApi.Data
                     case EntityState.Modified:
                         entry.Entity.UpdatedAt = now;
                         break;
+                    case EntityState.Deleted:
+                        entry.State = EntityState.Modified;
+                        entry.Entity.DeletedAt = now;
+                        entry.Entity.UpdatedAt = now;
+                        break;
                 }
             }
 
-            return await base.SaveChangesAsync(cancellationToken);
+            var result = await base.SaveChangesAsync(cancellationToken);
+            if (auditEntries.Count > 0)
+            {
+                AuditLogs.AddRange(auditEntries);
+                await base.SaveChangesAsync(cancellationToken);
+            }
+
+            return result;
         }
 
         public static void ApplyBaseEntityConfiguration(ModelBuilder modelBuilder)

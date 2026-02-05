@@ -1,8 +1,4 @@
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
 using PropertyCareApi.Models;
 
 namespace PropertyCareApi.Dtos
@@ -13,8 +9,7 @@ namespace PropertyCareApi.Dtos
         public Guid PropertyId { get; set; }
 
         [Required]
-        [MaxLength(128)]
-        public string Category { get; set; } = null!;
+        public RequestCategory Category { get; set; }
 
         [Required]
         [MaxLength(1024)]

@@ -5,7 +5,7 @@ namespace PropertyCareApi.Models
         public Guid PropertyId { get; set; }
         public Property Property { get; set; } = null!;
 
-        public string Category { get; set; } = null!;
+        public RequestCategory Category { get; set; }
         public string Description { get; set; } = null!;
         public PriorityLevel Priority { get; set; }
         public RequestStatus Status { get; set; } = RequestStatus.Submitted;
@@ -29,5 +29,16 @@ namespace PropertyCareApi.Models
         InProgress,
         Completed,
         Cancelled
+    }
+
+    public enum RequestCategory
+    {
+        Plumbing,
+        Electrical,
+        Carpentry,
+        Cleaning,
+        Painting,
+        Roofing,
+        Other
     }
 }

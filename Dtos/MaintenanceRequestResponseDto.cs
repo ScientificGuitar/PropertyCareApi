@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using PropertyCareApi.Models;
 
 namespace PropertyCareApi.Dtos
@@ -10,7 +6,7 @@ namespace PropertyCareApi.Dtos
     {
         public Guid Id { get; set; }
         public Guid PropertyId { get; set; }
-        public string Category { get; set; } = null!;
+        public RequestCategory Category { get; set; }
         public string Description { get; set; } = null!;
         public PriorityLevel Priority { get; set; }
         public RequestStatus Status { get; set; }

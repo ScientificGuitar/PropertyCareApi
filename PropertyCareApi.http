@@ -1,6 +1,58 @@
 @PropertyCareApi_HostAddress = http://localhost:5219
+@user_id = guid
+@property_id = guid
+@maintenance_request_id = guid
 
-GET {{PropertyCareApi_HostAddress}}/
+### Get all users
+GET {{PropertyCareApi_HostAddress}}/users
 Accept: application/json
 
-###
+### Get user by id
+GET {{PropertyCareApi_HostAddress}}/users/{{user_id}}
+Accept: application/json
+
+### Create new user
+POST {{PropertyCareApi_HostAddress}}/users
+Content-Type: application/json
+
+{
+    "email": "admin@admin.com",
+    "password": "password",
+    "role": "Tenant"
+}
+
+### Get all properties
+GET {{PropertyCareApi_HostAddress}}/properties
+Accept: application/json
+
+### Get property by id
+GET {{PropertyCareApi_HostAddress}}/properties/{{property_id}}
+Accept: application/json
+
+### Create new property
+POST {{PropertyCareApi_HostAddress}}/properties
+Content-Type: application/json
+
+{
+    "ownerId": "{{user_id}}",
+    "address": "404 Test Street, Mock City"
+}
+
+### Get all maintenance requests
+GET {{PropertyCareApi_HostAddress}}/maintenance-requests
+Accept: application/json
+
+### Get maintenance request by id
+GET {{PropertyCareApi_HostAddress}}/maintenance-requests/{{maintenance_request_id}}
+Accept: application/json
+
+### Create new property
+POST {{PropertyCareApi_HostAddress}}/maintenance-requests
+Content-Type: application/json
+
+{
+    "propertyId": "{{property_id}}",
+    "category": "Plumbing",
+    "description": "Kitchen sink leaking from pipe joint when turned on hot water.",
+    "priority": "Medium"
+}

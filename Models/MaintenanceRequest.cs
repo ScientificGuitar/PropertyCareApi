@@ -7,13 +7,13 @@ namespace PropertyCareApi.Models
 
         public RequestCategory Category { get; set; }
         public string Description { get; set; } = null!;
-        public PriorityLevel Priority { get; set; }
+        public RequestPriority Priority { get; set; }
         public RequestStatus Status { get; set; } = RequestStatus.Submitted;
 
         public DateTime? CompletedAt { get; set; }
     }
 
-    public enum PriorityLevel
+    public enum RequestPriority
     {
         Low,
         Medium,
@@ -25,7 +25,6 @@ namespace PropertyCareApi.Models
     {
         Submitted,
         Approved,
-        Scheduled,
         InProgress,
         Completed,
         Cancelled

@@ -1,9 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using PropertyCareApi.Application.Queries;
 using PropertyCareApi.Data;
 using PropertyCareApi.Dtos;
 using PropertyCareApi.Models;
@@ -20,10 +17,27 @@ namespace PropertyCareApi.Controllers
             => _db = db;
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<MaintenanceRequestResponseDto>>> GetAllMaintenanceRequests(CancellationToken cancellationToken)
+        public async Task<ActionResult<IEnumerable<MaintenanceRequestResponseDto>>> GetAllMaintenanceRequests([FromQuery] MaintenanceRequestQueryParameters query, CancellationToken cancellationToken)
         {
-            var maintenanceRequests = await _db.MaintenanceRequests
+            var maintenanceRequestsQuery = _db.MaintenanceRequests
                 .AsNoTracking()
+                .AsQueryable();
+
+            if (query.PropertyId.HasValue)
+                maintenanceRequestsQuery = maintenanceRequestsQuery.Where(m => m.PropertyId == query.PropertyId.Value);
+            if (query.Category.HasValue)
+                maintenanceRequestsQuery = maintenanceRequestsQuery.Where(m => m.Category == query.Category.Value);
+            if (query.Status.HasValue)
+                maintenanceRequestsQuery = maintenanceRequestsQuery.Where(m => m.Status == query.Status.Value);
+            if (query.Priority.HasValue)
+                maintenanceRequestsQuery = maintenanceRequestsQuery.Where(m => m.Priority == query.Priority.Value);
+
+            var skip = (query.PageNumber - 1) * query.PageSize;
+            var totalCount = await maintenanceRequestsQuery.CountAsync(cancellationToken);
+            var pagedMaintenanceRequests = await maintenanceRequestsQuery
+                .OrderByDescending(m => m.CreatedAt)
+                .Skip(skip)
+                .Take(query.PageSize)
                 .Select(m => new MaintenanceRequestResponseDto
                 {
                     Id = m.Id,
@@ -36,9 +50,14 @@ namespace PropertyCareApi.Controllers
                 })
                 .ToListAsync(cancellationToken);
 
-            return Ok(maintenanceRequests);
+            return Ok(new
+            {
+                totalCount,
+                pageNumber = query.PageNumber,
+                pageSize = query.PageSize,
+                items = pagedMaintenanceRequests
+            });
         }
-
 
         [HttpGet("{id:guid}")]
         public async Task<ActionResult<MaintenanceRequestResponseDto>> GetMaintenanceRequestById(Guid id, CancellationToken cancellationToken)
@@ -107,7 +126,5 @@ namespace PropertyCareApi.Controllers
                 response
             );
         }
-
-
     }
 }

@@ -40,7 +40,7 @@ namespace PropertyCareApi.Data
                 PropertyId = property.Id,
                 Category = RequestCategory.Plumbing,
                 Description = "Leaking pipe under sink",
-                Priority = PriorityLevel.High
+                Priority = RequestPriority.High
             };
 
             context.MaintenanceRequests.Add(request);

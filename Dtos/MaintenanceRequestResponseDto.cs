@@ -8,7 +8,7 @@ namespace PropertyCareApi.Dtos
         public Guid PropertyId { get; set; }
         public RequestCategory Category { get; set; }
         public string Description { get; set; } = null!;
-        public PriorityLevel Priority { get; set; }
+        public RequestPriority Priority { get; set; }
         public RequestStatus Status { get; set; }
         public DateTime CreatedAt { get; set; }
     }

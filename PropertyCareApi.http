@@ -42,6 +42,10 @@ Content-Type: application/json
 GET {{PropertyCareApi_HostAddress}}/maintenance-requests
 Accept: application/json
 
+### Get maintenance requests with some filters
+GET {{PropertyCareApi_HostAddress}}/maintenance-requests?status=Submitted&priority=High&category=Plumbing
+Accept: application/json
+
 ### Get maintenance request by id
 GET {{PropertyCareApi_HostAddress}}/maintenance-requests/{{maintenance_request_id}}
 Accept: application/json

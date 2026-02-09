@@ -16,6 +16,6 @@ namespace PropertyCareApi.Dtos
         public string Description { get; set; } = null!;
 
         [Required]
-        public PriorityLevel Priority { get; set; }
+        public RequestPriority Priority { get; set; }
     }
 }

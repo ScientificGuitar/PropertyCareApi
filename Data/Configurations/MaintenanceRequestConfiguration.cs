@@ -11,8 +11,7 @@ namespace PropertyCareApi.Data.Configurations
             builder.ToTable("maintenance_requests");
 
             builder.Property(m => m.Category)
-               .IsRequired()
-               .HasMaxLength(128);
+               .IsRequired();
 
             builder.Property(m => m.Description)
                 .IsRequired()

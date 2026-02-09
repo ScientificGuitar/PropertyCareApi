@@ -1,7 +1,7 @@
 @PropertyCareApi_HostAddress = http://localhost:5219
 @user_id = guid
 @property_id = guid
-@maintenance_request_id = guid
+@maintenance_request_id = a282cbf5-727c-4a6a-97f8-2e8a8837dab8
 
 ### Get all users
 GET {{PropertyCareApi_HostAddress}}/users
@@ -48,6 +48,10 @@ Accept: application/json
 
 ### Get maintenance request by id
 GET {{PropertyCareApi_HostAddress}}/maintenance-requests/{{maintenance_request_id}}
+Accept: application/json
+
+### Approve maintenance request
+PATCH {{PropertyCareApi_HostAddress}}/maintenance-requests/{{maintenance_request_id}}/approve
 Accept: application/json
 
 ### Create new property

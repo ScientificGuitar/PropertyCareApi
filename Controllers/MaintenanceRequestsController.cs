@@ -102,7 +102,7 @@ namespace PropertyCareApi.Controllers
                 Category = dto.Category,
                 Description = dto.Description,
                 Priority = dto.Priority,
-                Status = RequestStatus.Submitted,
+                Status = RequestStatus.Open,
                 CreatedAt = DateTime.UtcNow
             };
 
@@ -125,6 +125,58 @@ namespace PropertyCareApi.Controllers
                 new { id = maintenanceRequest.Id },
                 response
             );
+        }
+
+        [HttpPatch("{id:guid}/approve")]
+        public async Task<IActionResult> ApproveMaintenanceRequest(Guid id, CancellationToken cancellationToken)
+        {
+            var maintenanceRequest = await _db.MaintenanceRequests.FindAsync([id], cancellationToken);
+            if (maintenanceRequest is null)
+                return NotFound();
+
+            maintenanceRequest.Approve();
+            await _db.SaveChangesAsync(cancellationToken);
+
+            return NoContent();
+        }
+
+        [HttpPatch("{id:guid}/start")]
+        public async Task<IActionResult> StartMaintenanceRequest(Guid id, CancellationToken ct)
+        {
+            var maintenanceRequest = await _db.MaintenanceRequests.FindAsync([id], ct);
+            if (maintenanceRequest is null)
+                return NotFound();
+
+            maintenanceRequest.Start();
+            await _db.SaveChangesAsync(ct);
+
+            return NoContent();
+        }
+
+        [HttpPatch("{id:guid}/complete")]
+        public async Task<IActionResult> CompleteMaintenanceRequest(Guid id, CancellationToken ct)
+        {
+            var maintenanceRequest = await _db.MaintenanceRequests.FindAsync([id], ct);
+            if (maintenanceRequest is null)
+                return NotFound();
+
+            maintenanceRequest.Complete();
+            await _db.SaveChangesAsync(ct);
+
+            return NoContent();
+        }
+
+        [HttpPatch("{id:guid}/cancel")]
+        public async Task<IActionResult> CancelMaintenanceRequest(Guid id, CancellationToken ct)
+        {
+            var maintenanceRequest = await _db.MaintenanceRequests.FindAsync([id], ct);
+            if (maintenanceRequest is null)
+                return NotFound();
+
+            maintenanceRequest.Cancel();
+            await _db.SaveChangesAsync(ct);
+
+            return NoContent();
         }
     }
 }

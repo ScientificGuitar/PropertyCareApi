@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PropertyCareApi.Data;
@@ -12,17 +13,14 @@ namespace PropertyCareApi.Controllers
 {
     [ApiController]
     [Route("properties")]
-    public class PropertiesController : ControllerBase
+    public class PropertiesController(PropertyCareApiDbContext db) : ControllerBase
     {
-        private readonly PropertyCareApiDbContext _db;
-
-        public PropertiesController(PropertyCareApiDbContext db)
-            => _db = db;
-
+        [Authorize(Roles = "Admin, Tenant")]
+        //TODO: Filter Tenant to just see their own properties
         [HttpGet]
         public async Task<ActionResult<IEnumerable<PropertyResponseDto>>> GetAllProperties(CancellationToken cancellationToken)
         {
-            var properties = await _db.Properties
+            var properties = await db.Properties
                 .AsNoTracking()
                 .Select(p => new PropertyResponseDto
                 {
@@ -36,10 +34,12 @@ namespace PropertyCareApi.Controllers
             return Ok(properties);
         }
 
+        [Authorize(Roles = "Admin, Tenant")]
+        //TODO: Filter Tenant to just see their own properties
         [HttpGet("{id:guid}")]
         public async Task<ActionResult<PropertyResponseDto>> GetPropertyById(Guid id, CancellationToken cancellationToken)
         {
-            var property = await _db.Properties
+            var property = await db.Properties
                 .AsNoTracking()
                 .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
 
@@ -55,10 +55,12 @@ namespace PropertyCareApi.Controllers
             };
         }
 
+        [Authorize(Roles = "Admin, Tenant")]
+        //TODO: Admins can create properties for anyone, Tenants can just create properties for themselves
         [HttpPost]
         public async Task<ActionResult<PropertyResponseDto>> CreateProperty(CreatePropertyDto dto, CancellationToken cancellationToken)
         {
-            var ownerExists = await _db.Users
+            var ownerExists = await db.Users
                 .AnyAsync(u => u.Id == dto.OwnerId, cancellationToken);
 
             if (!ownerExists)
@@ -77,8 +79,8 @@ namespace PropertyCareApi.Controllers
                 CreatedAt = DateTime.UtcNow
             };
 
-            _db.Properties.Add(property);
-            await _db.SaveChangesAsync(cancellationToken);
+            db.Properties.Add(property);
+            await db.SaveChangesAsync(cancellationToken);
 
             var response = new PropertyResponseDto
             {

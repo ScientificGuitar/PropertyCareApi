@@ -4,6 +4,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PropertyCareApi.Data;
@@ -14,17 +15,13 @@ namespace PropertyCareApi.Controllers
 {
     [ApiController]
     [Route("users")]
-    public class UsersController : ControllerBase
+    public class UsersController(PropertyCareApiDbContext db) : ControllerBase
     {
-        private readonly PropertyCareApiDbContext _db;
-
-        public UsersController(PropertyCareApiDbContext db)
-            => _db = db;
-
+        [Authorize]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UserResponseDto>>> GetAllUsers(CancellationToken cancellationToken)
         {
-            var users = await _db.Users
+            var users = await db.Users
                 .AsNoTracking()
                 .Select(u => new UserResponseDto
                 {
@@ -38,10 +35,12 @@ namespace PropertyCareApi.Controllers
             return Ok(users);
         }
 
+        [Authorize(Roles = "Admin")]
+        // TODO: [Authorize] and let users get themselves and Admins retrieve all users
         [HttpGet("{id:guid}")]
         public async Task<ActionResult<UserResponseDto>> GetUserById(Guid id, CancellationToken cancellationToken)
         {
-            var user = await _db.Users
+            var user = await db.Users
                 .AsNoTracking()
                 .FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
 
@@ -58,10 +57,11 @@ namespace PropertyCareApi.Controllers
             };
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<ActionResult<UserResponseDto>> CreateUser(CreateUserDto dto, CancellationToken cancellationToken)
         {
-            var userExists = await _db.Users
+            var userExists = await db.Users
                 .AnyAsync(u => u.Email == dto.Email, cancellationToken);
 
             if (userExists)
@@ -74,13 +74,13 @@ namespace PropertyCareApi.Controllers
             {
                 Id = Guid.NewGuid(),
                 Email = dto.Email,
-                PasswordHash = HashPassword(dto.Password),
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
                 Role = dto.Role,
                 CreatedAt = DateTime.UtcNow
             };
 
-            _db.Users.Add(user);
-            await _db.SaveChangesAsync(cancellationToken);
+            db.Users.Add(user);
+            await db.SaveChangesAsync(cancellationToken);
 
             var response = new UserResponseDto
             {
@@ -95,13 +95,6 @@ namespace PropertyCareApi.Controllers
                 new { id = user.Id },
                 response
             );
-        }
-
-        private static string HashPassword(string password)
-        {
-            // Quick and easy hash for now
-            var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(password));
-            return Convert.ToBase64String(bytes);
         }
     }
 }

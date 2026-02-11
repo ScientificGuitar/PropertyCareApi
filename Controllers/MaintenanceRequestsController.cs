@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PropertyCareApi.Application.Queries;
@@ -9,17 +10,14 @@ namespace PropertyCareApi.Controllers
 {
     [ApiController]
     [Route("maintenance-requests")]
-    public class MaintenanceRequestsController : ControllerBase
+    public class MaintenanceRequestsController(PropertyCareApiDbContext db) : ControllerBase
     {
-        private readonly PropertyCareApiDbContext _db;
-
-        public MaintenanceRequestsController(PropertyCareApiDbContext db)
-            => _db = db;
-
+        [Authorize]
+        // TODO: Admin retrieve all, Tenant retrieve for requests for their properties, contractor retrieve non-completed requests
         [HttpGet]
         public async Task<ActionResult<IEnumerable<MaintenanceRequestResponseDto>>> GetAllMaintenanceRequests([FromQuery] MaintenanceRequestQueryParameters query, CancellationToken cancellationToken)
         {
-            var maintenanceRequestsQuery = _db.MaintenanceRequests
+            var maintenanceRequestsQuery = db.MaintenanceRequests
                 .AsNoTracking()
                 .AsQueryable();
 
@@ -59,10 +57,12 @@ namespace PropertyCareApi.Controllers
             });
         }
 
+        [Authorize]
+        // TODO: Admin retrieve all, Tenant retrieve for requests for their properties, contractor retrieve non-completed requests
         [HttpGet("{id:guid}")]
         public async Task<ActionResult<MaintenanceRequestResponseDto>> GetMaintenanceRequestById(Guid id, CancellationToken cancellationToken)
         {
-            var maintenanceRequest = await _db.MaintenanceRequests
+            var maintenanceRequest = await db.MaintenanceRequests
                 .AsNoTracking()
                 .FirstOrDefaultAsync(m => m.Id == id, cancellationToken);
 
@@ -81,10 +81,12 @@ namespace PropertyCareApi.Controllers
             };
         }
 
+        [Authorize(Roles = "Admin, Tenant")]
+        // TODO: Property must belong to tenant
         [HttpPost]
-        public async Task<ActionResult<MaintenanceRequestResponseDto>> Create(CreateMaintenanceRequestDto dto, CancellationToken cancellationToken)
+        public async Task<ActionResult<MaintenanceRequestResponseDto>> CreateMaintenanceRequest(CreateMaintenanceRequestDto dto, CancellationToken cancellationToken)
         {
-            var propertyExists = await _db.Properties
+            var propertyExists = await db.Properties
                 .AnyAsync(p => p.Id == dto.PropertyId, cancellationToken);
 
             if (!propertyExists)
@@ -106,8 +108,8 @@ namespace PropertyCareApi.Controllers
                 CreatedAt = DateTime.UtcNow
             };
 
-            _db.MaintenanceRequests.Add(maintenanceRequest);
-            await _db.SaveChangesAsync(cancellationToken);
+            db.MaintenanceRequests.Add(maintenanceRequest);
+            await db.SaveChangesAsync(cancellationToken);
 
             var response = new MaintenanceRequestResponseDto
             {
@@ -127,54 +129,59 @@ namespace PropertyCareApi.Controllers
             );
         }
 
+        [Authorize(Roles = "Admin, Contractor")]
         [HttpPatch("{id:guid}/approve")]
         public async Task<IActionResult> ApproveMaintenanceRequest(Guid id, CancellationToken cancellationToken)
         {
-            var maintenanceRequest = await _db.MaintenanceRequests.FindAsync([id], cancellationToken);
+            var maintenanceRequest = await db.MaintenanceRequests.FindAsync([id], cancellationToken);
             if (maintenanceRequest is null)
                 return NotFound();
 
             maintenanceRequest.Approve();
-            await _db.SaveChangesAsync(cancellationToken);
+            await db.SaveChangesAsync(cancellationToken);
 
             return NoContent();
         }
 
+        [Authorize(Roles = "Admin, Contractor")]
         [HttpPatch("{id:guid}/start")]
         public async Task<IActionResult> StartMaintenanceRequest(Guid id, CancellationToken ct)
         {
-            var maintenanceRequest = await _db.MaintenanceRequests.FindAsync([id], ct);
+            var maintenanceRequest = await db.MaintenanceRequests.FindAsync([id], ct);
             if (maintenanceRequest is null)
                 return NotFound();
 
             maintenanceRequest.Start();
-            await _db.SaveChangesAsync(ct);
+            await db.SaveChangesAsync(ct);
 
             return NoContent();
         }
 
+        [Authorize(Roles = "Admin, Contractor")]
         [HttpPatch("{id:guid}/complete")]
         public async Task<IActionResult> CompleteMaintenanceRequest(Guid id, CancellationToken ct)
         {
-            var maintenanceRequest = await _db.MaintenanceRequests.FindAsync([id], ct);
+            var maintenanceRequest = await db.MaintenanceRequests.FindAsync([id], ct);
             if (maintenanceRequest is null)
                 return NotFound();
 
             maintenanceRequest.Complete();
-            await _db.SaveChangesAsync(ct);
+            await db.SaveChangesAsync(ct);
 
             return NoContent();
         }
 
+        [Authorize]
+        // TODO: Tenant can cancel if status open and their property. Contractor can cancel if approved/assigned, Admin always
         [HttpPatch("{id:guid}/cancel")]
         public async Task<IActionResult> CancelMaintenanceRequest(Guid id, CancellationToken ct)
         {
-            var maintenanceRequest = await _db.MaintenanceRequests.FindAsync([id], ct);
+            var maintenanceRequest = await db.MaintenanceRequests.FindAsync([id], ct);
             if (maintenanceRequest is null)
                 return NotFound();
 
             maintenanceRequest.Cancel();
-            await _db.SaveChangesAsync(ct);
+            await db.SaveChangesAsync(ct);
 
             return NoContent();
         }

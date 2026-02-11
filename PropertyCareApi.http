@@ -2,17 +2,37 @@
 @user_id = guid
 @property_id = guid
 @maintenance_request_id = a282cbf5-727c-4a6a-97f8-2e8a8837dab8
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6ImQ1M2Y1ZGJmLTIzNzYtNDYxYS1hODFlLTVmZWEwYzk1YWE0YiIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL2VtYWlsYWRkcmVzcyI6ImFkbWluQHRlc3QuY29tIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiQWRtaW4iLCJleHAiOjE3NzA4MjEwOTEsImlzcyI6IlByb3BlcnR5Q2FyZUFwaSJ9.UhYk0YJv0lzInRG4c8Gx4gcS7GU8y1zVKzU6_TEeCLU
+
+### Register user
+POST {{PropertyCareApi_HostAddress}}/auth/register
+Content-Type: application/json
+
+{
+    "email": "tenant@test.com",
+    "password": "password"
+}
+
+### Login user
+POST {{PropertyCareApi_HostAddress}}/auth/login
+Content-Type: application/json
+
+{
+    "email": "admin@test.com",
+    "password": "password"
+}
 
 ### Get all users
 GET {{PropertyCareApi_HostAddress}}/users
-Accept: application/json
+Authorization: Bearer {{token}}
 
 ### Get user by id
 GET {{PropertyCareApi_HostAddress}}/users/{{user_id}}
-Accept: application/json
+Authorization: Bearer {{token}}
 
 ### Create new user
 POST {{PropertyCareApi_HostAddress}}/users
+Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
@@ -23,14 +43,15 @@ Content-Type: application/json
 
 ### Get all properties
 GET {{PropertyCareApi_HostAddress}}/properties
-Accept: application/json
+Authorization: Bearer {{token}}
 
 ### Get property by id
 GET {{PropertyCareApi_HostAddress}}/properties/{{property_id}}
-Accept: application/json
+Authorization: Bearer {{token}}
 
 ### Create new property
 POST {{PropertyCareApi_HostAddress}}/properties
+Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
@@ -40,22 +61,23 @@ Content-Type: application/json
 
 ### Get all maintenance requests
 GET {{PropertyCareApi_HostAddress}}/maintenance-requests
-Accept: application/json
+Authorization: Bearer {{token}}
 
 ### Get maintenance requests with some filters
 GET {{PropertyCareApi_HostAddress}}/maintenance-requests?status=Submitted&priority=High&category=Plumbing
-Accept: application/json
+Authorization: Bearer {{token}}
 
 ### Get maintenance request by id
 GET {{PropertyCareApi_HostAddress}}/maintenance-requests/{{maintenance_request_id}}
-Accept: application/json
+Authorization: Bearer {{token}}
 
 ### Approve maintenance request
 PATCH {{PropertyCareApi_HostAddress}}/maintenance-requests/{{maintenance_request_id}}/approve
-Accept: application/json
+Authorization: Bearer {{token}}
 
 ### Create new property
 POST {{PropertyCareApi_HostAddress}}/maintenance-requests
+Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {

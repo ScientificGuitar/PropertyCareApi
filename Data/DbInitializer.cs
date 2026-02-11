@@ -20,7 +20,7 @@ namespace PropertyCareApi.Data
                 Id = Guid.NewGuid(),
                 Email = "admin@test.com",
                 Role = UserRole.Admin,
-                PasswordHash = HashPassword("password")
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("password")
             };
 
             context.Users.Add(adminUser);
@@ -46,13 +46,6 @@ namespace PropertyCareApi.Data
             context.MaintenanceRequests.Add(request);
 
             await context.SaveChangesAsync();
-        }
-
-        private static string HashPassword(string password)
-        {
-            // Quick and easy hash for now
-            var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(password));
-            return Convert.ToBase64String(bytes);
         }
     }
 }

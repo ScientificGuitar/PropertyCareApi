@@ -1,0 +1,88 @@
+@PropertyCare_HostAddress = http://localhost:5219
+@user_id = guid
+@property_id = guid
+@maintenance_request_id = a282cbf5-727c-4a6a-97f8-2e8a8837dab8
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjEyZGQ3OTRkLTBjZjktNDYzZi1iODQ0LWU2NDk1NzA4NTMwNCIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL2VtYWlsYWRkcmVzcyI6ImFkbWluQHRlc3QuY29tIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiQWRtaW4iLCJleHAiOjE3NzA5MDc4MDMsImlzcyI6IlByb3BlcnR5Q2FyZUFwaSJ9.ajSmiyijlXjFjK-GQwnE2KdWwBWB2aCzCJlKAKOstjM
+
+### Register user
+POST {{PropertyCare_HostAddress}}/auth/register
+Content-Type: application/json
+
+{
+    "email": "tenant@test.com",
+    "password": "password"
+}
+
+### Login user
+POST {{PropertyCare_HostAddress}}/auth/login
+Content-Type: application/json
+
+{
+    "email": "admin@test.com",
+    "password": "password"
+}
+
+### Get all users
+GET {{PropertyCare_HostAddress}}/users
+Authorization: Bearer {{token}}
+
+### Get user by id
+GET {{PropertyCare_HostAddress}}/users/{{user_id}}
+Authorization: Bearer {{token}}
+
+### Create new user
+POST {{PropertyCare_HostAddress}}/users
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "email": "admin@admin.com",
+    "password": "password",
+    "role": "Tenant"
+}
+
+### Get all properties
+GET {{PropertyCare_HostAddress}}/properties
+Authorization: Bearer {{token}}
+
+### Get property by id
+GET {{PropertyCare_HostAddress}}/properties/{{property_id}}
+Authorization: Bearer {{token}}
+
+### Create new property
+POST {{PropertyCare_HostAddress}}/properties
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "ownerId": "{{user_id}}",
+    "address": "404 Test Street, Mock City"
+}
+
+### Get all maintenance requests
+GET {{PropertyCare_HostAddress}}/maintenance-requests
+Authorization: Bearer {{token}}
+
+### Get maintenance requests with some filters
+GET {{PropertyCare_HostAddress}}/maintenance-requests?status=Submitted&priority=High&category=Plumbing
+Authorization: Bearer {{token}}
+
+### Get maintenance request by id
+GET {{PropertyCare_HostAddress}}/maintenance-requests/{{maintenance_request_id}}
+Authorization: Bearer {{token}}
+
+### Approve maintenance request
+PATCH {{PropertyCare_HostAddress}}/maintenance-requests/{{maintenance_request_id}}/approve
+Authorization: Bearer {{token}}
+
+### Create new property
+POST {{PropertyCare_HostAddress}}/maintenance-requests
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "propertyId": "{{property_id}}",
+    "category": "Plumbing",
+    "description": "Kitchen sink leaking from pipe joint when turned on hot water.",
+    "priority": "Medium"
+}

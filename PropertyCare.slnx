@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/PropertyCare.Application/PropertyCare.Application.csproj" />
+    <Project Path="src/PropertyCare.Domain/PropertyCare.Domain.csproj" />
+    <Project Path="src/PropertyCare.Infrastructure/PropertyCare.Infrastructure.csproj" />
+    <Project Path="src/PropertyCare.Web/PropertyCare.Web.csproj" />
+  </Folder>
+</Solution>

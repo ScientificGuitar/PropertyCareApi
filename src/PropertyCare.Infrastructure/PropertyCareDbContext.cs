@@ -1,0 +1,94 @@
+using Microsoft.EntityFrameworkCore;
+using PropertyCare.Domain.Common;
+using PropertyCare.Domain.Entities;
+
+namespace PropertyCare.Infrastructure;
+
+public class PropertyCareDbContext(DbContextOptions<PropertyCareDbContext> options) : DbContext(options)
+{
+    public DbSet<User> Users => Set<User>();
+    public DbSet<Property> Properties => Set<Property>();
+    public DbSet<MaintenanceRequest> MaintenanceRequests => Set<MaintenanceRequest>();
+    public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(PropertyCareDbContext).Assembly);
+
+        // https://www.milanjovanovic.tech/blog/implementing-soft-delete-with-ef-core
+        // What this basically does is append `WHERE DeletedAt IS NULL` to most queries.
+        modelBuilder.Entity<User>().HasQueryFilter(u => u.DeletedAt == null);
+        modelBuilder.Entity<Property>().HasQueryFilter(p => p.DeletedAt == null);
+        modelBuilder.Entity<MaintenanceRequest>().HasQueryFilter(m => m.DeletedAt == null);
+
+        ApplyBaseEntityConfiguration(modelBuilder);
+    }
+
+    // https://www.j-labs.pl/en/tech-blog/who-modified-it-and-when-a-clean-way-to-update-audit-columns-in-a-sql-database/
+    // Updates the audit fields for models inheriting BaseEntity when added/updated
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        var now = DateTime.UtcNow;
+
+        var auditEntries = ChangeTracker.Entries<BaseEntity>()
+            .Where(e =>
+                e.State == EntityState.Added ||
+                e.State == EntityState.Modified ||
+                e.State == EntityState.Deleted)
+            .Select(e => new AuditLog
+            {
+                Id = Guid.NewGuid(),
+                EntityType = e.Entity.GetType().Name,
+                EntityId = e.Entity.Id,
+                Action = e.State.ToString(),
+                CreatedAt = now
+            })
+            .ToList();
+
+        foreach (var entry in ChangeTracker.Entries<BaseEntity>())
+        {
+            switch (entry.State)
+            {
+                case EntityState.Added:
+                    entry.Entity.CreatedAt = now;
+                    break;
+                case EntityState.Modified:
+                    entry.Entity.UpdatedAt = now;
+                    break;
+                case EntityState.Deleted:
+                    entry.State = EntityState.Modified;
+                    entry.Entity.DeletedAt = now;
+                    entry.Entity.UpdatedAt = now;
+                    break;
+            }
+        }
+
+        var result = await base.SaveChangesAsync(cancellationToken);
+        if (auditEntries.Count > 0)
+        {
+            AuditLogs.AddRange(auditEntries);
+            await base.SaveChangesAsync(cancellationToken);
+        }
+
+        return result;
+    }
+
+    public static void ApplyBaseEntityConfiguration(ModelBuilder modelBuilder)
+    {
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+        {
+            if (!typeof(BaseEntity).IsAssignableFrom(entityType.ClrType))
+                continue;
+
+            var entity = modelBuilder.Entity(entityType.ClrType);
+
+            entity.Ignore(nameof(BaseEntity.IsDeleted));
+
+            entity.HasIndex(nameof(BaseEntity.DeletedAt));
+
+            entity.Property(nameof(BaseEntity.CreatedAt))
+                  .IsRequired();
+        }
+    }
+}
